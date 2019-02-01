@@ -2,70 +2,32 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Moometric\mooSignature;
+
 // Update with your GSuite domain and admin email address
 $admin_email = "admin@domain.com";
 $domain = "domain.com";
-$sigPath ="/your/project/path/signatures/";
-$serviceAccountPath = "/your/project/path/local_vars/";
+
+// If the credentials or signatures are set in other paths than the default ones, set them below
+// $mooSig->addSettingServiceAccountPath("/your/project/path/local_vars/");
+// $mooSig->addsettingSignaturePath("/your/project/path/signatures/");
 
 $mooSig = new mooSignature($domain, $admin_email);
 
-// OPTIONAL - Setting the service account path and signature path if not using default location
-//$mooSig->addSettingServiceAccountPath($serviceAccountPath);
-//$mooSig->addsettingSignaturePath($sigPath);
-
-// Setting test and preview mode so no changes are written
-$mooSig->addSettingRunTestMode(True);
-$mooSig->addSettingPreviewSignature(True);
-
+// Setting test mode so no changes are written. Switch to false to actually perform changes.
+$mooSig->addSettingRunTestMode(true);
+// Preview Signature.
+$mooSig->addSettingPreviewSignature(true);
 // Setting the default signature
 $mooSig->addSettingSetTemplate("defaultSig.html");
 
-echo "<h2>Updating a single user from domain</h2>";
-// Example 1: setting a single user from domain
-$mooSig->addSettingGetUsersFromGsuite(True);
-$mooSig->addSettingFilterEmailsToUpdate(["$admin_email"]);
+// Update signatures based on a whitelist, so only for those added below
+// $mooSig->addSettingFilterEmailsToUpdate(["user@domain.com", "user2@domain.com"]);
+
+// Update the signature for all users but exclude those who don't have a profile photo or title set.
+// $mooSig->addSettingSkipConditions(["title", "thumbnailPhotoUrl"]);
+
+// Update the signature for all users
 $mooSig->updateSignatures();
 
-// Example 2: Set the MOTD to "Hello World" in red
-echo "<h2>Setting MOTD </h2>";
-$mooSig->addSettingMOTDHTML("<span style=\"color: red;\">Hello World</span>");
-$mooSig->addSettingMOTDPosition("Below");
-$mooSig->addSettingMOTD(True);
-$mooSig->setSignatureMOTD();
-
-echo "<h2>List of avaliable merge fields</h2>";
-// Example 3: For fun, list avaliable merge fields that can be used in your email template
+echo "<h2>List of available merge fields which can be used in the signature</h2>";
 $mooSig->listMergeFields();
-
-echo "<h2>From array of users</h2>";
-// Example 4: setting users from array
-$mooSig->addSettingUnsetFilters();
-$mooSig->addSettingMOTDHTML("<span style=\"color: red;\">MOTD from Array/JSON</span>");
-$mooSig->addSettingUserArray([
-							[
-								"primaryEmail" => "fakeEmail@moometric.com", 
-								"alias" => "fakeEmail@moometric.com", 
-								"thumbnailPhotoUrl" => "https://i.imgur.com/JRF8XKq.png",
-								"fullName" => "MooMaster",
-								"phone0" => "555-555-555",
-								"title" => "IT Admin / Developer"
-							],
-							[
-								"primaryEmail" => "anotherEmail@moometric.com", 
-								"alias" => "anotherEmail@moometric.com", 
-								"thumbnailPhotoUrl" => "https://i.imgur.com/JRF8XKq.png",
-								"fullName" => "MooMinor",
-								"phone0" => "444-444-444",
-								"title" => "DevOps Admin"
-							]
-						]);
-$mooSig->updateSignatures();
-
-echo "<h2>From testUsers.JSON file</h2>";
-// Example 5: setting users from JSON file
-$mooSig->addSettingUsersFile("testUsers.json");
-$mooSig->updateSignatures();
-
-
-
