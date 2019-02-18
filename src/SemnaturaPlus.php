@@ -482,7 +482,7 @@ class SemnaturaPlus {
   public function buildSigGroups(array $need_sig_update, array $filtered_users): array {
     $sig_groups = [];
     foreach ( $need_sig_update as $primary_email ) {
-      if ( !empty($filtered_users[$primary_email]['thumbnailPhotoUrl']) ) {
+      if ( !empty($filtered_users[$primary_email]['thumbnailPhotoUrl']) && !preg_match("/photos\/private/", $filtered_users[$primary_email]['thumbnailPhotoUrl']) ) {
         $sig_groups['plus'][] = $primary_email;
       } else {
         $sig_groups['plus-no-photo'][] = $primary_email;
