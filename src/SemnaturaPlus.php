@@ -9,8 +9,13 @@ namespace Moometric;
  */
 class SemnaturaPlus {
 
+  // main info
   const ADMIN_EMAIL = 'user@domain.com';
   const DOMAIN = 'domain.com';
+  // account types
+  const PERSON = 'persoana';
+  const BRANCH = 'filiala';
+  const GENERIC = 'generic';
 
   // Object variables updated by functions
   public $user_email;
@@ -500,7 +505,9 @@ class SemnaturaPlus {
   public function buildSigGroups(array $need_sig_update, array $filtered_users): array {
     $sig_groups = [];
     foreach ( $need_sig_update as $alias ) {
-      if ( !empty($filtered_users[$alias]['thumbnailPhotoUrl']) && !preg_match("/photos\/private/", $filtered_users[$alias]['thumbnailPhotoUrl']) ) {
+      if ( !empty($filtered_users[$alias]['accountType']) && $filtered_users[$alias]['accountType'] == self::GENERIC ) {
+        $sig_groups['plus-generic'][] = $alias;
+      } elseif ( !empty($filtered_users[$alias]['thumbnailPhotoUrl']) && !preg_match("/photos\/private/", $filtered_users[$alias]['thumbnailPhotoUrl']) ) {
         $sig_groups['plus'][] = $alias;
       } else {
         $sig_groups['plus-no-photo'][] = $alias;
