@@ -19,6 +19,7 @@ class SemnaturaPlus {
   public $previous_user_data = [];
   public $filter_users = [];
   public $overrides = [];
+  public $addresses = [];
   // Google services that need to be instantiated
   public $google_client;
   public $google_service_directory;
@@ -61,6 +62,15 @@ class SemnaturaPlus {
       $this->filter_users = json_decode($content, TRUE);
       if ( json_last_error() !== JSON_ERROR_NONE ) {
         echo "JSON data from filter-users.json is incorrect:" . json_last_error_msg();
+        exit;
+      }
+    }
+
+    $content = file_get_contents($this->setting_json_path . 'addresses.json');
+    if ( !empty($content) ) {
+      $this->addresses = json_decode($content, TRUE);
+      if ( json_last_error() !== JSON_ERROR_NONE ) {
+        echo "JSON data from addresses.json is incorrect:" . json_last_error_msg();
         exit;
       }
     }
@@ -273,6 +283,8 @@ class SemnaturaPlus {
   public function generateTemplate($user_info) {
     var_dump($user_info);
     $custom_info = '';
+    $this->current_email_signature = $this->setting_email_template;
+
     if ( !empty($user_info['title']) ) {
       $custom_info = $user_info['title'] . '<br>';
       unset($user_info['title']);
@@ -290,9 +302,15 @@ class SemnaturaPlus {
       $custom_info .= $user_info['websites'] . '<br>';
       unset($user_info['websites']);
     }
-
-    $this->current_email_signature = $this->setting_email_template;
     $this->current_email_signature = str_replace('{{customInfo}}', $custom_info, $this->current_email_signature);
+
+    if ( !empty($user_info['address']) ) {
+      $address = $this->addresses[$user_info['address']];
+    } else {
+      $address = $this->addresses[0];
+    }
+    $this->current_email_signature = str_replace('{{address}}', $address, $this->current_email_signature);
+
     foreach ( $user_info as $key => $value ) {
       $this->current_email_signature = str_replace('{{' . $key . '}}', $value, $this->current_email_signature);
     }
@@ -352,7 +370,7 @@ class SemnaturaPlus {
         }
 
         foreach ( $fields as $field => $value ) {
-          if ( !in_array($field, $available_fields) && $field != 'alreadyUpdated' && !empty($available_fields) ) {
+          if ( !in_array($field, array_merge($available_fields, ['alreadyUpdated', 'address'])) && !empty($available_fields) ) {
             unset($local_overrides[$alias][$field]);
             echo("<p>The field " . $field . " is not a valid field, so it has been ignored<p>");
           }
@@ -481,11 +499,11 @@ class SemnaturaPlus {
 
   public function buildSigGroups(array $need_sig_update, array $filtered_users): array {
     $sig_groups = [];
-    foreach ( $need_sig_update as $primary_email ) {
-      if ( !empty($filtered_users[$primary_email]['thumbnailPhotoUrl']) && !preg_match("/photos\/private/", $filtered_users[$primary_email]['thumbnailPhotoUrl']) ) {
-        $sig_groups['plus'][] = $primary_email;
+    foreach ( $need_sig_update as $alias ) {
+      if ( !empty($filtered_users[$alias]['thumbnailPhotoUrl']) && !preg_match("/photos\/private/", $filtered_users[$alias]['thumbnailPhotoUrl']) ) {
+        $sig_groups['plus'][] = $alias;
       } else {
-        $sig_groups['plus-no-photo'][] = $primary_email;
+        $sig_groups['plus-no-photo'][] = $alias;
       }
     }
 
