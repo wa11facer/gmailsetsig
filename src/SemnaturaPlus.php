@@ -518,7 +518,7 @@ class SemnaturaPlus {
   }
 
   private function markOverridesAsDone(array $user) {
-    if ( $this->setting_testing_mode === TRUE && !empty($this->overrides) ) {
+    if ( $this->setting_testing_mode === FALSE && !empty($this->overrides) ) {
       if ( isset($this->overrides[$user['alias']]) ) {
         $filtered_copy = $this->overrides;
         unset($filtered_copy[$user['alias']]['alreadyUpdated']);
