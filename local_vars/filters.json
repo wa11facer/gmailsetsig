@@ -1,0 +1,8 @@
+{
+  "testMode": false,
+  "type": "whitelist",
+  "members":
+  [
+    "example@domain.com"
+  ]
+}

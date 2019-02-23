@@ -18,7 +18,7 @@ class SemnaturaPlus {
   const GENERIC = 'generic';
   # config files
   const ADDRESSES = 'addresses.json';
-  const FILTER = 'filter-users.json';
+  const FILTER = 'filters.json';
   const OVERRIDES = 'overrides.json';
   const USER_DATA = 'user-data.json';
 
@@ -29,7 +29,7 @@ class SemnaturaPlus {
   public $user_alias;
   public $current_email_signature;
   public $previous_user_data = [];
-  public $filter_users = [];
+  public $filters = [];
   public $overrides = [];
   public $addresses = [];
   # Google services that need to be instantiated
@@ -64,9 +64,15 @@ class SemnaturaPlus {
     }
 
     $this->previous_user_data = Helper::readConfigFile($this->setting_json_path . self::USER_DATA, $this->logger);
-    $this->filter_users = Helper::readConfigFile($this->setting_json_path . self::FILTER, $this->logger);
+    $this->filters = Helper::readConfigFile($this->setting_json_path . self::FILTER, $this->logger);
     $this->addresses = Helper::readConfigFile($this->setting_json_path . self::ADDRESSES, $this->logger);
     $this->overrides = Helper::readConfigFile($this->setting_json_path . self::OVERRIDES, $this->logger);
+
+    # set test mode according to the setting in the FILTERS file, if valid
+    if ( isset($this->filters['testMode']) && is_bool($this->filters['testMode']) ) {
+      $this->logger->info('TEST->' . var_export($this->filters['testMode'], TRUE));
+      $this->setting_testing_mode = $this->filters['testMode'];
+    }
 
     # clean-up any left-over fields in alreadyUpdated tags
     foreach ( $this->overrides as $alias => $fields ) {
@@ -261,14 +267,14 @@ class SemnaturaPlus {
       }
     }
 
-    # exclusion based on the type and content of filter-users.json
-    if ( $this->filter_users['type'] === 'whitelist') {
-      if ( array_search($filtered_users[$key]['alias'], $this->filter_users['members']) === FALSE ) {
+    # exclusion based on the type and content of filters.json
+    if ( $this->filters['type'] === 'whitelist') {
+      if ( array_search($filtered_users[$key]['alias'], $this->filters['members']) === FALSE ) {
         $this->logger->info($filtered_users[$key]['alias'] . ' NOT validated due to Whitelist');
         return FALSE;
       }
-    } elseif ( $this->filter_users['type'] === 'blacklist' ) {
-      if ( array_search($filtered_users[$key]['alias'], $this->filter_users['members']) !== FALSE ) {
+    } elseif ( $this->filters['type'] === 'blacklist' ) {
+      if ( array_search($filtered_users[$key]['alias'], $this->filters['members']) !== FALSE ) {
         $this->logger->info($filtered_users[$key]['alias'] . ' NOT validated due to Blacklist');
         return FALSE;
       }
@@ -478,7 +484,7 @@ class SemnaturaPlus {
     $this->logger->info('Reapplying manual overrides for aliases need updating due to fresh GSuite data');
     foreach ( $need_sig_update as $alias ) {
       if ( isset($this->overrides[$alias]) ) {
-        $this->logger->debug('Reapplying manual override for: ', $alias);
+        $this->logger->debug('Reapplying manual override for: ' . $alias);
         $filtered_users[$alias] = array_merge($filtered_users[$alias], $this->overrides[$alias]);
         unset($filtered_users[$alias]['alreadyUpdated']);
       }

@@ -22,8 +22,6 @@ if ( php_sapi_name() === 'cli' ) {
 
 $plusSig = new SemnaturaPlus($logger);
 
-# Setting test mode so no changes are written. Switch to false to actually perform changes.
-$plusSig->addSettingRunTestMode(TRUE);
 echo "<h4>Test Mode is set to <b>" . var_export($plusSig->setting_testing_mode, TRUE) . "</b></h4>";
 
 # Preview Signature.
