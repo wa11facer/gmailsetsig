@@ -50,7 +50,7 @@ class SemnaturaPlus {
   public $setting_signature_path = __DIR__ . '/../signatures/';
   public $setting_service_account_path = __DIR__ . '/../local_vars/';
 
-  public function __construct(object $logger) {
+  public function __construct(\Monolog\Logger $logger) {
     $this->logger = $logger;
 
     $this->logger->info('Initial settings: TEST->' . var_export($this->setting_testing_mode, TRUE) . ', PREVIEW->' . var_export($this->setting_preview_template, TRUE) . ', REMOVE_BLANKS->' . var_export($this->setting_remove_blanks, TRUE));

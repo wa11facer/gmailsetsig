@@ -6,7 +6,7 @@ class Helper {
 
   const ERROR_MSG = 'ERROR, see logs (browser console or folder logs).';
 
-  public static function readConfigFile(string $config_file, object $logger) {
+  public static function readConfigFile(string $config_file, \Monolog\Logger $logger) {
     $content = file_get_contents($config_file);
     if ( !empty($content) ) {
       $content = json_decode($content, TRUE);
